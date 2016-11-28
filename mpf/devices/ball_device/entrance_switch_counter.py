@@ -14,10 +14,11 @@ class EntranceSwitchCounter(BallDeviceBallCounter):
         """Initialise entrance switch counter."""
         super().__init__(ball_device, config)
         # Configure switch handlers for entrance switch activity
-        self.machine.switch_controller.add_switch_handler(
-            switch_name=self.config['entrance_switch'].name, state=1,
-            ms=0,
-            callback=self._entrance_switch_handler)
+        if self.config['entrance_switch']:
+            self.machine.switch_controller.add_switch_handler(
+                switch_name=self.config['entrance_switch'].name, state=1,
+                ms=0,
+                callback=self._entrance_switch_handler)
 
         if self.config['entrance_switch_full_timeout'] and self.config['ball_capacity']:
             self.machine.switch_controller.add_switch_handler(
@@ -86,7 +87,8 @@ class EntranceSwitchCounter(BallDeviceBallCounter):
 
     def _wait_for_ball_to_leave(self):
         """Wait for a ball to leave."""
-        if self.machine.switch_controller.is_active(self.config['entrance_switch'].name):
+        if self.config['entrance_switch'] and \
+                self.machine.switch_controller.is_active(self.config['entrance_switch'].name):
             return self.machine.switch_controller.wait_for_switch(
                 switch_name=self.config['entrance_switch'].name,
                 state=0)

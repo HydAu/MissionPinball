@@ -33,4 +33,6 @@ ball_devices:
     plunger:
         ball_capacity: 1
         mechanical_eject: true
-        tags: ball_add_live, home
+        eject_timeouts: 3s
+        tags: ball_add_live, home, trough
+        entrance_events: initial_ball

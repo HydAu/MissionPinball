@@ -56,14 +56,19 @@ class TestBallDeviceNoPlungerSwitch(MpfTestCase):
         self.trough_coil = self.machine.coils.trough_eject
         self.trough_coil.pulse = MagicMock()
 
-        self.hit_and_release_switch('s_start')
+        # add fake ball to launcher
+        self.post_event("initial_ball")
+        self.advance_time_and_run(10)
 
-        self.advance_time_and_run()
-        self.assertIsNotNone(self.machine.game)
-        self.assertEqual(self.machine.game.player.ball, 1)
         self.assertEqual(self.machine.ball_devices.trough.balls, 0)
         self.assertEqual(self.machine.ball_devices.plunger.balls, 1)
         self.assertEqual(self.machine.ball_devices.playfield.balls, 0)
+
+        # game start should work
+        self.hit_and_release_switch('s_start')
+        self.advance_time_and_run()
+        self.assertIsNotNone(self.machine.game)
+        self.assertEqual(self.machine.game.player.ball, 1)
 
         # playfield switch hit indicates that ball has been plunged
         self.hit_and_release_switch('s_playfield')
@@ -85,7 +90,7 @@ class TestBallDeviceNoPlungerSwitch(MpfTestCase):
         self.assertEqual(self.machine.ball_devices.trough.balls, 0)
         # self.assertEqual(self.machine.ball_devices.playfield.balls, 1)
 
-        self.assertEqual(self.machine.game.player.ball, 1)
+        self.assertEqual(self.machine.game.player.ball, 2)
 
         self.hit_and_release_switch('s_playfield')
         self.advance_time_and_run()
@@ -103,4 +108,4 @@ class TestBallDeviceNoPlungerSwitch(MpfTestCase):
         self.assertEqual(self.machine.ball_devices.trough.balls, 0)
         # self.assertEqual(self.machine.ball_devices.playfield.balls, 1)
 
-        self.assertEqual(self.machine.game.player.ball, 2)
+        self.assertEqual(self.machine.game.player.ball, 3)

@@ -51,3 +51,56 @@ class TestBallDeviceNoPlungerSwitch(MpfTestCase):
 
         self.assertEqual(self.machine.ball_devices.trough.balls, 1)
         self.assertEqual(self.machine.ball_devices.playfield.balls, 0)
+
+    def test_game_start_with_ball_in_plunger_lane(self):
+        self.trough_coil = self.machine.coils.trough_eject
+        self.trough_coil.pulse = MagicMock()
+
+        self.hit_and_release_switch('s_start')
+
+        self.advance_time_and_run()
+        self.assertIsNotNone(self.machine.game)
+        self.assertEqual(self.machine.game.player.ball, 1)
+        self.assertEqual(self.machine.ball_devices.trough.balls, 0)
+        self.assertEqual(self.machine.ball_devices.plunger.balls, 1)
+        self.assertEqual(self.machine.ball_devices.playfield.balls, 0)
+
+        # playfield switch hit indicates that ball has been plunged
+        self.hit_and_release_switch('s_playfield')
+        self.advance_time_and_run()
+        self.assertEqual(self.machine.ball_devices.playfield.balls, 1)
+        self.assertEqual(self.machine.ball_devices.plunger.balls, 0)
+        self.hit_and_release_switch('s_playfield')
+        self.advance_time_and_run()
+        self.hit_and_release_switch('s_playfield')
+        self.advance_time_and_run()
+
+        # drain the ball
+        self.machine.switch_controller.process_switch('s_trough_1', 1)
+        self.advance_time_and_run(1)
+        self.assertEqual(1, self.trough_coil.pulse.called)
+        self.machine.switch_controller.process_switch('s_trough_1', 0)
+        self.advance_time_and_run(.5)
+
+        self.assertEqual(self.machine.ball_devices.trough.balls, 0)
+        # self.assertEqual(self.machine.ball_devices.playfield.balls, 1)
+
+        self.assertEqual(self.machine.game.player.ball, 1)
+
+        self.hit_and_release_switch('s_playfield')
+        self.advance_time_and_run()
+        self.hit_and_release_switch('s_playfield')
+        self.advance_time_and_run()
+        self.hit_and_release_switch('s_playfield')
+        self.advance_time_and_run()
+
+        self.machine.switch_controller.process_switch('s_trough_1', 1)
+        self.advance_time_and_run(1)
+        self.assertEqual(1, self.trough_coil.pulse.called)
+        self.machine.switch_controller.process_switch('s_trough_1', 0)
+        self.advance_time_and_run(.5)
+
+        self.assertEqual(self.machine.ball_devices.trough.balls, 0)
+        # self.assertEqual(self.machine.ball_devices.playfield.balls, 1)
+
+        self.assertEqual(self.machine.game.player.ball, 2)

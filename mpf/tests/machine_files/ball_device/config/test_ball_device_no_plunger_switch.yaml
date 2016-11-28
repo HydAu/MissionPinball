@@ -18,10 +18,19 @@ switches:
     s_playfield:
         number:
         tags: playfield_active
+    s_start:
+        number:
+        tags: start
 
 ball_devices:
     trough:
         eject_coil: trough_eject
         ball_switches: s_trough_1, s_trough_2, s_trough_3, s_trough_4
         debug: true
-        tags: trough, drain, home, ball_add_live
+        tags: trough, drain, home
+        eject_targets: plunger
+        eject_timeouts: 3s
+    plunger:
+        ball_capacity: 1
+        mechanical_eject: true
+        tags: ball_add_live, home
